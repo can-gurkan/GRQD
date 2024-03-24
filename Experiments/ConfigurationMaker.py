@@ -5,19 +5,19 @@ import os
 mutation_rates = [0.01]
 morphology_mutation_rates = [0.01]
 mutation_sigmas = [0.1]
-encodings = ['lsystem']
+encodings = ['direct','lsystem']
+n_duplicates = 1
+ea_type = ['deap', 'map-elites']
 
-def create(experiment_nr = 0,mr = 0.01,mmr = 0.01,ms = 0.1,enc = 'lsystem',dir=''):
+def save_config(experiment_nr,mr,mmr,ms,enc,dir,eat='deap'):
 	config = configparser.ConfigParser()
 	config['experiment'] = {}
 	config['experiment']['checkpoint_frequency'] = '10'
 	config['experiment']['save_elite'] = '1'
-	config['experiment']['experiment_number'] = str(experiment_nr)
-	config['experiment']['directory'] = dir
-
+	
 	config['ea'] = {}
 	# total number of evaluations: note that generations is calculated as 'n_evaluations' / 'batch_size'
-	config['ea']['n_evaluations'] = '10000'
+	config['ea']['n_evaluations'] = '100000'
 	# Number of individuals evaluated per generation 
 	config['ea']['batch_size'] = '100'
 	# probability for controller mutations
@@ -37,6 +37,8 @@ def create(experiment_nr = 0,mr = 0.01,mmr = 0.01,ms = 0.1,enc = 'lsystem',dir='
 	# placeholder, not implemented in this version
 	#config['ea']['crossover_prob']
 	config['ea']['interval'] = '5'
+	# choose which type of ea to use
+	config['ea']['type'] = eat
 
 
 	config['morphology'] = {}
@@ -60,11 +62,7 @@ def create(experiment_nr = 0,mr = 0.01,mmr = 0.01,ms = 0.1,enc = 'lsystem',dir='
 	config['visualization']['v_tree'] = '0'
 	config['visualization']['v_progression'] = '0'
 	config['visualization']['v_debug'] = '0'
-	return config
-
-def save_config(config):
-	print("Saving config in : ", config['experiment']['directory'])
-	with open(config['experiment']['directory']+str(config['experiment']['experiment_number'])+'.cfg', 'w') as configfile:
+	with open(dir+str(experiment_nr)+'.cfg', 'w') as configfile:
 		config.write(configfile)
 
 if __name__ == "__main__":
@@ -72,12 +70,11 @@ if __name__ == "__main__":
 	if not os.path.exists(directory):
 	    os.makedirs(directory)
 	nr = 0
-	n_duplicates = 1
 	for enc in encodings:
 		for mr in mutation_rates:
 			for mmr in morphology_mutation_rates:
 				for ms in mutation_sigmas:
-					for i in range(n_duplicates):
-						config = create(nr, mr,mmr,ms, enc, directory +'/')
-						save_config(config)
-						nr+=1
+					for eat in ea_type:
+						for i in range(n_duplicates):
+							save_config(nr, mr,mmr,ms, enc, directory +'/', eat)
+							nr+=1
