@@ -5,7 +5,7 @@ def evaluate(individual, evaluation_steps= 10000, headless=True, render_interval
 	env = r2d.getEnv()
 	if tree_depth is None:
 		try:
-		   tree_depth = individual.tree_depth
+			tree_depth = individual.tree_depth
 		except:
 			raise Exception("Tree depth not defined in evaluation")
 	tree = individual.genome.create(tree_depth)

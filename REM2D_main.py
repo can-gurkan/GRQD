@@ -42,6 +42,8 @@ from termcolor import colored, cprint
 # removed, contained hacky scripts. 
 import DataAnalysis as da
 
+ARCHIVE_SIZE = 3
+
 # singleton equivalent
 env = None
 def getEnv():
@@ -248,7 +250,8 @@ class run2D():
 		toolbox.register("evaluate", evaluate,HEADLESS = self.headless, TREE_DEPTH = self.TREE_DEPTH)
 		toolbox.register("mutate", Individual.mutate, self.MORPH_MUTATION_RATE,self.MUTATION_RATE,self.MUT_SIGMA)
 
-		Map = mymap.Map(self.TREE_LEAVES)
+		#Map = mymap.Map(self.TREE_LEAVES)
+		Map = mymap.Map(ARCHIVE_SIZE)
 
 		N_GENERATIONS = 1+ int(int(config['ea']['n_evaluations'])/self.POPULATION_SIZE)
 		N_GENERATIONS -= len(self.fitnessData.avg)
@@ -375,7 +378,8 @@ class run2D():
 		toolbox.register("mutate", Individual.mutate, self.MORPH_MUTATION_RATE,self.MUTATION_RATE,self.MUT_SIGMA)
 		toolbox.register("select",tools.selTournament, tournsize = 4)
 
-		Map = mymap.Map(self.TREE_LEAVES)
+		#Map = mymap.Map(self.TREE_LEAVES)
+		Map = mymap.Map(ARCHIVE_SIZE)
 
 		N_GENERATIONS = 1+ int(int(config['ea']['n_evaluations'])/self.POPULATION_SIZE)
 		N_GENERATIONS -= len(self.fitnessData.avg)
@@ -487,7 +491,8 @@ def display_stats(config,dir,pop=100):
 
 	population = pickle.load(open(os.path.join(dir, 's_') + "pop" + str(pop), "rb"))
 
-	Map = mymap.Map(TREE_LEAVES)
+	#Map = mymap.Map(TREE_LEAVES)
+	Map = mymap.Map(ARCHIVE_SIZE)
 
 	for ind in population:
 		Map.eval_individual(ind, TREE_DEPTH = TREE_DEPTH)
@@ -513,7 +518,8 @@ def record_result(config, dir, EVALUATION_STEPS= 10000, INTERVAL=100, ENV_LENGTH
 
 	population = pickle.load(open(os.path.join(dir, 's_') + "pop" + str(pop), "rb"))
 
-	Map = mymap.Map(TREE_LEAVES)
+	#Map = mymap.Map(TREE_LEAVES)
+	Map = mymap.Map(ARCHIVE_SIZE)
 
 	for ind in population:
 		Map.eval_individual(ind, TREE_DEPTH = TREE_DEPTH)
@@ -582,7 +588,7 @@ def evaluate(individual, EVALUATION_STEPS= 10000, HEADLESS=True, INTERVAL=100, E
 	env = getEnv()
 	if TREE_DEPTH is None:
 		try:
-		   TREE_DEPTH = individual.tree_depth
+			TREE_DEPTH = individual.tree_depth
 		except:
 			raise Exception("Tree depth not defined in evaluation")
 	tree = individual.genome.create(TREE_DEPTH)
@@ -617,7 +623,7 @@ def evaluate(individual, EVALUATION_STEPS= 10000, HEADLESS=True, INTERVAL=100, E
 def setup():
 	parser = argparse.ArgumentParser(description='Process arguments for configurations.')
 	parser.add_argument('--file',type = str, help='config file', default="3.cfg")
-	parser.add_argument('--seed',type = int, help='seed', default=0)
+	parser.add_argument('--seed',type = int, help='seed', default=random.randint(0,100000))
 	parser.add_argument('--headless',type = int, help='headless mode', default=1)
 	parser.add_argument('--n_processes',type = int, help='number of processes to use', default=1)
 	parser.add_argument('--output',type = str, help='output directory', default='results')
@@ -625,8 +631,8 @@ def setup():
 	parser.add_argument('--mr',type = float, help='Mutation rate', default=0.64)
 	parser.add_argument('--mmr',type = float, help = 'Morphological mutation rate', default=0.32)
 	parser.add_argument('--sigma',type = float, help = 'sigma', default=1.0)
-	parser.add_argument('--cores',type = int, help='number of cores to use', default=6)
-	parser.add_argument('--n_evaluations',type = int, help='number of total evalutions', default=100000)
+	parser.add_argument('--cores',type = int, help='number of cores to use', default=8)
+	parser.add_argument('--n_evaluations',type = int, help='number of total evalutions', default=1000)
 	parser.add_argument('--batch_size',type = int, help='batch/population size', default=100)
 	args = parser.parse_args()
 	random.seed(int(args.seed))
@@ -685,6 +691,6 @@ if __name__ == "__main__":
 	config, dir = setup()
 	experiment = run2D(config,dir)
 	experiment.run(config)
-	#display_stats(config,dir,pop=1000)
-	#record_result(config,dir,group=True,pop=1000)
+	display_stats(config,dir,pop=10)
+	record_result(config,dir,group=True,pop=10)
 	

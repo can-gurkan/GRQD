@@ -57,6 +57,12 @@ class Map():
         else:
             phenotype = individual.genome.create(TREE_DEPTH).get_leaves(individual.genome.expressed_nodes)
 
+            #print(self._dims,phenotype,np.floor_divide(self._dims, phenotype+1))
+
+            if phenotype >= self._dims:
+                max_size = 39
+                phenotype = int((phenotype/float(max_size))*self._dims)
+
             if self._map[phenotype] is None:
                 self._map[phenotype] = self.Cell()
                 self._map[phenotype].set_cell(individual)
