@@ -73,7 +73,7 @@ MODULE_H = 8/SCALE
 
 DISPLAY_JOINTS = False
 DISPLAY_VECTORS = False
-WOD_SPEED = 0.04
+WOD_SPEED = 0.02
 
 JET_FORCE = 10.
 VIEWPORT_W = 800
@@ -375,11 +375,15 @@ class Modular2D(gym.Env, EzPickle):
 			self.fd_edge.shape.vertices=poly
 			t = self.world.CreateStaticBody(
 				fixtures = self.fd_edge)
-			color = (0.3, 1.0 if i%2==0 else 0.8, 0.3)
+			#### terrain edge color
+			#color = (0.3, 1.0 if i%2==0 else 0.8, 0.3)
+			color = (0.0, 0.0, 0.6 if i%2==0 else 0.8)
 			t.color1 = color
 			t.color2 = color
 			self.terrain.append(t)
 			color = (0.4, 0.6, 0.3)
+			#### Terrain color
+			color = (0.4, 0.0, 0.6)
 			poly += [ (poly[1][0], 0), (poly[0][0], 0) ]
 			self.terrain_poly.append( (poly, color) )
 		self.terrain.reverse()
@@ -792,7 +796,10 @@ class Modular2D(gym.Env, EzPickle):
 		self._destroy()
 		# Creating the world since not all objects were properly deleted. TODO need to debug this
 		self.world = Box2D.b2World()
-		self.world.cmap = plt.get_cmap('viridis')
+		#### body color
+		#self.world.cmap = plt.get_cmap('viridis')
+		#self.world.cmap = plt.get_cmap('plasma')
+		self.world.cmap = plt.get_cmap('cool')
 		self.game_over = False
 		self.scroll = 0.0
 		self.scroll_y = 0.0
@@ -975,9 +982,9 @@ class Modular2D(gym.Env, EzPickle):
 
 	def render(self, mode='human'):
 		from gym.envs.classic_control import rendering
-		SCALE= 80
-		self.scroll = 2.3
-		self.scroll_y = 4.5
+		#SCALE= 80
+		#self.scroll = 2.3
+		#self.scroll_y = 4.5
 
 		if self.viewer is None:
 			self.viewer = rendering.Viewer(VIEWPORT_W, VIEWPORT_H)
@@ -988,11 +995,11 @@ class Modular2D(gym.Env, EzPickle):
 			(self.scroll+VIEWPORT_W/SCALE, self.scroll_y),
 			(self.scroll+VIEWPORT_W/SCALE, self.scroll_y+VIEWPORT_H/SCALE),
 			(self.scroll,                  self.scroll_y+VIEWPORT_H/SCALE),
-			], color=(0.9, 0.9, 1.0) )
-		for poly,x1,x2 in self.cloud_poly:
-			if x2 < self.scroll/2: continue
-			if x1 > self.scroll/2 + VIEWPORT_W/SCALE: continue
-			self.viewer.draw_polygon( [(p[0]+self.scroll/2, p[1]+self.scroll_y) for p in poly], color=(1,1,1))
+			], color=(0.01, 0.0, 0.02) ) #### sky color color=(0.9, 0.9, 1.0); (0.18, 0.03, 0.33)
+		#for poly,x1,x2 in self.cloud_poly:
+		#	if x2 < self.scroll/2: continue
+		#	if x1 > self.scroll/2 + VIEWPORT_W/SCALE: continue
+		#	self.viewer.draw_polygon( [(p[0]+self.scroll/2, p[1]+self.scroll_y) for p in poly], color=(0.3,0.3,0.3)) #### cloud color
 		for poly, color in self.terrain_poly:
 			if poly[1][0] < self.scroll : continue
 			if poly[0][0] > self.scroll + VIEWPORT_W/SCALE: continue
@@ -1056,7 +1063,8 @@ class Modular2D(gym.Env, EzPickle):
 				for p in ps:
 					t = rendering.Transform(translation = p)
 					self.viewer.draw_circle(0.1, 30).add_attr(t)
-		return self.viewer.render(return_rgb_array = mode=='rgb_array')
+		
+		#return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
 		if self.wod:
 			wodposdown = []
@@ -1065,8 +1073,8 @@ class Modular2D(gym.Env, EzPickle):
 			wodposdown.append(-10)
 			wodposup.append(self.wod.position)
 			wodposup.append(40)
-			self.viewer.draw_line(wodposup,wodposdown,color=(0,0,1))
-		return self.viewer.render(return_rgb_array = mode=='rgb_array')
+			self.viewer.draw_line(wodposup,wodposdown,color=(1,0,0))
+		#return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
 		flagy1 = TERRAIN_HEIGHT
 		flagy2 = flagy1 + 50/SCALE

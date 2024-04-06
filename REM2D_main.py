@@ -42,7 +42,8 @@ from termcolor import colored, cprint
 # removed, contained hacky scripts. 
 import DataAnalysis as da
 
-ARCHIVE_SIZE = 3
+ARCHIVE_SIZE = 10
+ENV_SEED = 52
 
 # singleton equivalent
 env = None
@@ -335,6 +336,7 @@ class run2D():
 					#self.fitnessData.save(self.SAVE_FILE_DIRECTORY)
 					self.fitnessData.save(self.SAVE_FILE_DIRECTORY)
 					pickle.dump(Map.get_elites(),open(self.SAVE_FILE_DIRECTORY + self.POPULATION_FILE + str(i), "wb"))
+					pickle.dump(Map.get_best_elite(),open(self.SAVE_FILE_DIRECTORY + self.BEST_INDIVIDUAL_FILE, "wb"))
 
 			if self.PLOT_FITNESS:
 				self.plotter.plotFitnessProgress(self.fitnessData)
@@ -503,6 +505,7 @@ def display_stats(config,dir,pop=100):
 	sys.stdout.write("\nPrecision for map : %s" % (Map.precision))
 	sys.stdout.write("\nReliability for map : %s" % (Map.reliability))
 	sys.stdout.write("\nQD-score : %s" % (Map.QD_score))
+	sys.stdout.write("\nBest Elite fitness : %s" % (Map.get_best_elite().fitness))
 
 	print("\n\n=======================================\n")
 
@@ -529,7 +532,7 @@ def record_result(config, dir, EVALUATION_STEPS= 10000, INTERVAL=100, ENV_LENGTH
 		
 		tree = best_ind.genome.create(TREE_DEPTH)
 
-		env.seed(4)
+		env.seed(ENV_SEED)
 		env.reset(tree=tree, module_list=best_ind.genome.moduleList)
 
 		it = 0
@@ -556,7 +559,7 @@ def record_result(config, dir, EVALUATION_STEPS= 10000, INTERVAL=100, ENV_LENGTH
 		for e in best_group:
 			tree = e.genome.create(TREE_DEPTH)
 
-			env.seed(4)
+			env.seed(ENV_SEED)
 			env.reset(tree=tree, module_list=e.genome.moduleList)
 
 			it = 0
@@ -592,7 +595,7 @@ def evaluate(individual, EVALUATION_STEPS= 10000, HEADLESS=True, INTERVAL=100, E
 		except:
 			raise Exception("Tree depth not defined in evaluation")
 	tree = individual.genome.create(TREE_DEPTH)
-	env.seed(4)
+	env.seed(ENV_SEED)
 	individual.genome.expressed_nodes = env.reset(tree=tree, module_list=individual.genome.moduleList)
 
 	it = 0
@@ -691,6 +694,6 @@ if __name__ == "__main__":
 	config, dir = setup()
 	experiment = run2D(config,dir)
 	experiment.run(config)
-	display_stats(config,dir,pop=10)
-	record_result(config,dir,group=True,pop=10)
+	display_stats(config,dir,pop=100)
+	#record_result(config,dir,group=True,pop=100)
 	
